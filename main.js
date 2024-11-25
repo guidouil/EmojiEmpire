@@ -60,7 +60,20 @@ class GameScene extends Phaser.Scene {
       "🍖",
     ];
     this.currentLevel = parseInt(localStorage.getItem("level")) || 1;
-    this.baseEmojiSize = 64;
+    this.baseEmojiSize = window.innerWidth < 768 ? 128 : 64;
+
+    // Détection du dark mode
+    this.isDarkMode =
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+    // Écouter les changements de thème
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", (e) => {
+        this.isDarkMode = e.matches;
+        this.updateColors();
+      });
   }
 
   preload() {
@@ -137,6 +150,17 @@ class GameScene extends Phaser.Scene {
     // Mettre à jour l'emoji initial
     const emojiIndex = (this.currentLevel - 1) % this.emojiList.length;
     this.emoji.setText(this.emojiList[emojiIndex]);
+
+    // Appliquer les couleurs initiales
+    this.updateColors();
+
+    // Ajuster la taille des textes pour mobile
+    const textSize = window.innerWidth < 768 ? "48px" : "32px";
+    const buttonSize = window.innerWidth < 768 ? "36px" : "24px";
+
+    this.emojisText.setFontSize(textSize);
+    this.levelText.setFontSize(textSize);
+    this.upgradeButton.setFontSize(buttonSize);
   }
 
   resize(gameSize) {
@@ -275,6 +299,19 @@ class GameScene extends Phaser.Scene {
     const scale = 1 + progress;
     this.emoji.setScale(scale);
   }
+
+  updateColors() {
+    const textColor = this.isDarkMode ? "#ffffff" : "#000000";
+    const bgColor = this.isDarkMode ? "#1a1a1a" : "#f0f0f0";
+
+    this.cameras.main.setBackgroundColor(bgColor);
+
+    if (this.emojisText) {
+      this.emojisText.setColor(textColor);
+      this.levelText.setColor(textColor);
+      this.upgradeButton.setColor(textColor);
+    }
+  }
 }
 
 const config = {
@@ -284,9 +321,12 @@ const config = {
     parent: "game",
     width: "100%",
     height: "100%",
+    zoom: window.innerWidth < 768 ? 2 : 1, // Zoom x2 sur mobile
   },
   scene: [GameScene],
-  backgroundColor: "#f0f0f0",
+  backgroundColor: window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "#1a1a1a"
+    : "#f0f0f0",
 };
 
 const game = new Phaser.Game(config);
