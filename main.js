@@ -3,7 +3,6 @@ class GameScene extends Phaser.Scene {
   constructor() {
     super("GameScene");
     this.emojiList = [
-      "🍌",
       "😊",
       "🎮",
       "🚀",
@@ -21,6 +20,7 @@ class GameScene extends Phaser.Scene {
       "🥑",
       "🥕",
       "🌶️",
+      "🍌",
       "🍯",
       "❄️",
       "🌐",
@@ -106,11 +106,11 @@ class GameScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    // Bouton d'amélioration
+    // Bouton d'amélioration plus haut
     this.upgradeButton = this.add
       .text(
         centerX,
-        centerY + 250,
+        centerY + 150,
         "Upgrade (Cost: " + this.upgradeCost + ") 📈",
         {
           fontSize: "24px",
@@ -149,11 +149,14 @@ class GameScene extends Phaser.Scene {
       this.emoji.setPosition(width / 2, height / 2);
       this.emojisText.setPosition(width / 2, 50);
       this.levelText.setPosition(width / 2, 100);
-      this.upgradeButton.setPosition(width / 2, height - 100);
+      this.upgradeButton.setPosition(width / 2, height - 150);
 
-      // Repositionner le message d'erreur si présent
+      // Repositionner le message d'erreur
       if (this.errorText) {
-        this.errorText.setPosition(width / 2 - 20, this.upgradeButton.y - 40);
+        this.errorText.setPosition(
+          width / 2 - this.upgradeButton.width / 2,
+          this.upgradeButton.y - 60
+        );
       }
     }
   }
@@ -162,36 +165,35 @@ class GameScene extends Phaser.Scene {
     this.emojis += this.emojisPerClick;
     this.emojisText.setText("Emojis: " + this.emojis);
 
-    localStorage.setItem("emojis", this.emojis);
-
-    if (this.errorText) {
-      this.errorText.removeAllListeners();
-      this.errorText.destroy();
-    }
-
-    // Animation de clic améliorée
+    // Animation de clic plus grande
     this.tweens.add({
       targets: this.emoji,
-      scale: { from: 1, to: 2 },
-      rotation: { from: -0.1, to: 0.1 },
-      duration: 200,
+      scale: { from: 1, to: 2.5 },
+      rotation: { from: -0.2, to: 0.2 },
+      duration: 300,
       ease: "Bounce.easeOut",
       yoyo: true,
     });
 
-    // Petit effet de particules
+    // Effet de particules plus grand
     const x = this.emoji.x;
     const y = this.emoji.y;
-    const sparkle = this.add.text(x, y, "✨", { fontSize: "32px" });
+    const sparkle = this.add.text(x, y, "✨", {
+      fontSize: "48px",
+    });
     sparkle.setOrigin(0.5);
 
     this.tweens.add({
       targets: sparkle,
-      y: y - 100,
+      y: y - 150,
       alpha: 0,
-      duration: 1000,
+      duration: 1200,
       onComplete: () => sparkle.destroy(),
     });
+
+    if (this.errorText) {
+      this.errorText.destroy();
+    }
   }
 
   upgradeClick() {
@@ -225,43 +227,38 @@ class GameScene extends Phaser.Scene {
         this.errorText.destroy();
       }
 
-      // Animation de changement de niveau
+      // Animation de niveau plus spectaculaire
       this.tweens.add({
         targets: this.emoji,
-        scale: { from: 1, to: 3 },
-        rotation: { from: 0, to: Math.PI * 2 },
-        duration: 1000,
+        scale: { from: 1, to: 4 },
+        rotation: { from: 0, to: Math.PI * 4 },
+        duration: 1500,
         ease: "Cubic.easeOut",
         onComplete: () => {
-          // Effet d'explosion de particules
-          for (let i = 0; i < 8; i++) {
-            const angle = (i / 8) * Math.PI * 2;
+          // Plus de particules dans l'explosion
+          for (let i = 0; i < 12; i++) {
+            const angle = (i / 12) * Math.PI * 2;
             const sparkle = this.add
-              .text(this.emoji.x, this.emoji.y, "🌟", { fontSize: "32px" })
+              .text(this.emoji.x, this.emoji.y, "🌟", { fontSize: "48px" })
               .setOrigin(0.5);
 
             this.tweens.add({
               targets: sparkle,
-              x: this.emoji.x + Math.cos(angle) * 100,
-              y: this.emoji.y + Math.sin(angle) * 100,
+              x: this.emoji.x + Math.cos(angle) * 200,
+              y: this.emoji.y + Math.sin(angle) * 200,
               alpha: 0,
-              duration: 1000,
+              duration: 1500,
               onComplete: () => sparkle.destroy(),
             });
           }
         },
       });
     } else {
-      // Retirer l'ancien message d'erreur s'il existe
-      if (this.errorText) {
-        this.errorText.destroy();
-      }
-
-      // Créer le nouveau message d'erreur à côté du bouton d'amélioration
+      // Message d'erreur plus haut
       this.errorText = this.add
         .text(
           this.scale.width / 2 - this.upgradeButton.width / 2,
-          this.upgradeButton.y - 40,
+          this.upgradeButton.y - 60,
           "❌ Not enough emojis!",
           {
             fontSize: "24px",
@@ -269,13 +266,6 @@ class GameScene extends Phaser.Scene {
           }
         )
         .setOrigin(0, 0.5);
-
-      // Faire disparaître le message après 2 secondes
-      this.time.delayedCall(2000, () => {
-        if (this.errorText) {
-          this.errorText.destroy();
-        }
-      });
     }
   }
 
