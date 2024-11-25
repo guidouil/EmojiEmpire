@@ -146,10 +146,10 @@ class GameScene extends Phaser.Scene {
     this.cameras.main.setViewport(0, 0, width, height);
 
     if (this.emoji) {
-      this.emoji.setPosition(width / 2, height / 2);
+      this.emoji.setPosition(width / 2, height / 2 - 150);
       this.emojisText.setPosition(width / 2, 50);
       this.levelText.setPosition(width / 2, 100);
-      this.upgradeButton.setPosition(width / 2, height - 150);
+      this.upgradeButton.setPosition(width / 2, height - 250);
 
       // Repositionner le message d'erreur
       if (this.errorText) {
