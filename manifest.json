@@ -1,0 +1,9 @@
+{
+  "name": "EmojiEmpire",
+  "description": "An emoji clicker game",
+  "author": "Guidouil",
+  "main": "main.js",
+  "start_url": "https://guidouil.github.io/EmojiEmpire/index.html",
+  "display": "standalone",
+  "orientation": "portrait"
+}
