@@ -93,14 +93,14 @@ class GameScene extends Phaser.Scene {
 
     // Affichage des compteurs
     this.emojisText = this.add
-      .text(centerX, 50, "Emojis : " + this.emojis, {
+      .text(centerX, 50, "Emojis: " + this.emojis, {
         fontSize: "32px",
         fill: "#000",
       })
       .setOrigin(0.5);
 
     this.levelText = this.add
-      .text(centerX, 100, "Level : " + this.currentLevel, {
+      .text(centerX, 100, "Level: " + this.currentLevel, {
         fontSize: "32px",
         fill: "#000",
       })
@@ -111,7 +111,7 @@ class GameScene extends Phaser.Scene {
       .text(
         centerX,
         centerY + 250,
-        "Upgrade (Cost : " + this.upgradeCost + ") 📈",
+        "Upgrade (Cost: " + this.upgradeCost + ") 📈",
         {
           fontSize: "24px",
           fill: "#000",
@@ -130,9 +130,9 @@ class GameScene extends Phaser.Scene {
     this.upgradeCost = parseInt(localStorage.getItem("upgradeCost")) || 10;
 
     // Mettre à jour l'affichage initial avec les valeurs sauvegardées
-    this.emojisText.setText("Emojis : " + this.emojis);
-    this.levelText.setText("Level : " + this.currentLevel);
-    this.upgradeButton.setText("Upgrade (Cost : " + this.upgradeCost + ") 📈");
+    this.emojisText.setText("Emojis: " + this.emojis);
+    this.levelText.setText("Level: " + this.currentLevel);
+    this.upgradeButton.setText("Upgrade (Cost: " + this.upgradeCost + ") 📈");
 
     // Mettre à jour l'emoji initial
     const emojiIndex = (this.currentLevel - 1) % this.emojiList.length;
@@ -160,23 +160,37 @@ class GameScene extends Phaser.Scene {
 
   collectEmoji() {
     this.emojis += this.emojisPerClick;
-    this.emojisText.setText("Emojis : " + this.emojis);
+    this.emojisText.setText("Emojis: " + this.emojis);
 
-    // Sauvegarder après chaque collecte
     localStorage.setItem("emojis", this.emojis);
 
-    // retirer le texte d'erreur si présent
     if (this.errorText) {
       this.errorText.removeAllListeners();
       this.errorText.destroy();
     }
 
-    // Effet visuel du clic
+    // Animation de clic améliorée
     this.tweens.add({
       targets: this.emoji,
-      scale: 3,
-      duration: 500,
+      scale: { from: 1, to: 2 },
+      rotation: { from: -0.1, to: 0.1 },
+      duration: 200,
+      ease: "Bounce.easeOut",
       yoyo: true,
+    });
+
+    // Petit effet de particules
+    const x = this.emoji.x;
+    const y = this.emoji.y;
+    const sparkle = this.add.text(x, y, "✨", { fontSize: "32px" });
+    sparkle.setOrigin(0.5);
+
+    this.tweens.add({
+      targets: sparkle,
+      y: y - 100,
+      alpha: 0,
+      duration: 1000,
+      onComplete: () => sparkle.destroy(),
     });
   }
 
@@ -191,13 +205,11 @@ class GameScene extends Phaser.Scene {
       this.emoji.setText(this.emojiList[emojiIndex]);
 
       // Mettre à jour les textes
-      this.emojisText.setText("Emojis : " + this.emojis);
-      this.levelText.setText("Level : " + this.currentLevel);
+      this.emojisText.setText("Emojis: " + this.emojis);
+      this.levelText.setText("Level: " + this.currentLevel);
 
       this.upgradeCost *= 2;
-      this.upgradeButton.setText(
-        "Upgrade (Cost : " + this.upgradeCost + ") 📈"
-      );
+      this.upgradeButton.setText("Upgrade (Cost: " + this.upgradeCost + ") 📈");
 
       // Réinitialiser la taille
       this.emoji.setScale(1);
@@ -212,6 +224,33 @@ class GameScene extends Phaser.Scene {
       if (this.errorText) {
         this.errorText.destroy();
       }
+
+      // Animation de changement de niveau
+      this.tweens.add({
+        targets: this.emoji,
+        scale: { from: 1, to: 3 },
+        rotation: { from: 0, to: Math.PI * 2 },
+        duration: 1000,
+        ease: "Cubic.easeOut",
+        onComplete: () => {
+          // Effet d'explosion de particules
+          for (let i = 0; i < 8; i++) {
+            const angle = (i / 8) * Math.PI * 2;
+            const sparkle = this.add
+              .text(this.emoji.x, this.emoji.y, "🌟", { fontSize: "32px" })
+              .setOrigin(0.5);
+
+            this.tweens.add({
+              targets: sparkle,
+              x: this.emoji.x + Math.cos(angle) * 100,
+              y: this.emoji.y + Math.sin(angle) * 100,
+              alpha: 0,
+              duration: 1000,
+              onComplete: () => sparkle.destroy(),
+            });
+          }
+        },
+      });
     } else {
       // Retirer l'ancien message d'erreur s'il existe
       if (this.errorText) {
@@ -223,7 +262,7 @@ class GameScene extends Phaser.Scene {
         .text(
           this.scale.width / 2 - this.upgradeButton.width / 2,
           this.upgradeButton.y - 40,
-          "❌ Pas assez d'emojis!",
+          "❌ Not enough emojis!",
           {
             fontSize: "24px",
             fill: "#f00",
